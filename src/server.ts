@@ -3,10 +3,13 @@ import cors from 'cors';
 import logger from 'morgan'
 import verifyToken from '../middleware/verifyToken'
 import dotenv from 'dotenv';
-dotenv.config();
+import { connectDB } from '../db/db'
 
+dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
+
+connectDB();
 
 app.use(
   cors({

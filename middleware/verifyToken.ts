@@ -13,7 +13,6 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
     if (!secret) {
       return res.status(500).json({ err: 'Server configuration error' });
     }
-
     const decoded = jwt.verify(token, secret);
 
     req.user = decoded;
