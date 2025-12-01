@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import { v4 as getId } from 'uuid';
 import { User } from '../models/User';
 import { Request, Response } from 'express';
-import dotenv from 'dotenv';
 
 interface SignUpRequestBody {
   email: string;
