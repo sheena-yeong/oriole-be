@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import { initUserModel } from '../models/User';
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ const sequelize = new Sequelize(
     logging: false,
   }
 );
+
+initUserModel(sequelize);
 
 const connectDB = async () => {
   try {
