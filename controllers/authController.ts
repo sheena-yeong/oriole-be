@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { v4 as getId } from 'uuid';
 import { User } from '../models/User';
 import { Request, Response } from 'express';
+import dotenv from 'dotenv';
 
 interface SignUpRequestBody {
   email: string;
@@ -60,5 +61,46 @@ export const signUp = async (
     }
 
     return res.status(500).json({ error: 'An unexpected error occurred' });
+  }
+};
+
+interface SignInRequestBody {
+  email: string;
+  password: string;
+}
+
+export const signIn = async (
+  req: Request<{}, {}, SignInRequestBody>,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    const claims = {
+      id: user.id,
+      email: user.email,
+    };
+
+    const access = jwt.sign(claims, process.env.ACCESS_SECRET!, {
+      expiresIn: '1d',
+      jwtid: getId(),
+    });
+
+    return res.status(200).json({ message: 'Login successful.', access });
+  } catch (err) {
+    if (err instanceof Error) {
+      return res.status(500).json({ error: err.message });
+    }
+    return res.status(500).json({ error: 'An unexpected error occurred.' });
   }
 };
