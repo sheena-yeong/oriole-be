@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import logger from 'morgan'
-import verifyToken from '../middleware/verifyToken'
+import logger from 'morgan';
+import verifyToken from '../middleware/verifyToken';
 import dotenv from 'dotenv';
-import { connectDB } from '../db/db'
+import { connectDB } from '../db/db';
+import authRouter from '../routers/authRoutes';
 
 dotenv.config();
 const app = express();
@@ -17,11 +18,12 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(logger('dev'))
+app.use(logger('dev'));
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!');
 });
+app.use('/auth', authRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
