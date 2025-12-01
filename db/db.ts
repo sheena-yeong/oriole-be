@@ -15,11 +15,11 @@ const sequelize = new Sequelize(
   }
 );
 
-initUserModel(sequelize);
-
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
+    initUserModel(sequelize);
+    await sequelize.sync({ alter: true });
     console.log('Database connected');
   } catch (error) {
     console.error('Unable to connect:', error);
