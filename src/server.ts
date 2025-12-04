@@ -5,6 +5,7 @@ import verifyToken from '../middleware/verifyToken';
 import dotenv from 'dotenv';
 import { connectDB } from '../db/db';
 import authRouter from '../routers/authRoutes';
+import cryptoRouter from '../routers/cryptoRoutes'
 
 dotenv.config();
 const app = express();
@@ -20,10 +21,10 @@ app.use(
 app.use(express.json());
 app.use(logger('dev'));
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!');
-});
+
 app.use('/auth', authRouter);
+app.use('/coins', cryptoRouter);
+
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
