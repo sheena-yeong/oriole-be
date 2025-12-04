@@ -59,7 +59,7 @@ export const signUp = async (
       return res.status(500).json({ error: err.message });
     }
 
-    return res.status(500).json({ error: 'An unexpected error occurred' });
+    return res.status(500).json({ error: 'An unexpected error occurred.' });
   }
 };
 
