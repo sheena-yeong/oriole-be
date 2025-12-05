@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import logger from 'morgan';
-import verifyToken from '../middleware/verifyToken';
+import { verifyToken } from '../middleware/verifyToken';
 import dotenv from 'dotenv';
 import { connectDB } from '../db/db';
 import authRouter from '../routers/authRoutes';
-import cryptoRouter from '../routers/cryptoRoutes'
+import cryptoRouter from '../routers/cryptoRoutes';
 
 dotenv.config();
 const app = express();
@@ -21,10 +21,8 @@ app.use(
 app.use(express.json());
 app.use(logger('dev'));
 
-
 app.use('/auth', authRouter);
-app.use('/coins', cryptoRouter);
-
+app.use('/coins', verifyToken, cryptoRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
