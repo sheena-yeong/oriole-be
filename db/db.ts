@@ -1,6 +1,7 @@
-import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import { Sequelize } from 'sequelize';
 import { initUserModel } from '../models/User';
+import { initCoinModel } from '../models/Coin';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ const connectDB = async () => {
   try {
     await sequelize.authenticate();
     initUserModel(sequelize);
+    initCoinModel(sequelize);
     await sequelize.sync({ alter: true });
     console.log('Database connected');
   } catch (error) {
