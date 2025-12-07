@@ -56,6 +56,9 @@ export async function fetchCoins() {
       change24h: coin.price_change_percentage_24h,
     }));
   } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 429) {
+      console.log('Rate Limit reached, try again later.')
+    }
     console.error(err);
     throw new Error('Failed to fetch crypto data');
   }

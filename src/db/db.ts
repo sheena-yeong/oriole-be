@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Sequelize } from 'sequelize';
 import { initUserModel } from '../models/User';
-import { initCoinModel } from '../models/Coin';
+import { initCoinModel } from '../models/WatchList';
 
 dotenv.config();
 

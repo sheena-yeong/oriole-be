@@ -1,21 +1,15 @@
 import { DataTypes, Model, Sequelize } from 'sequelize';
 
-export class Coin extends Model {
+export class WatchList extends Model {
   public id!: number;
-  public name!: string;
   public symbol!: string;
 }
 
-export const initCoinModel = (sequelize: Sequelize): typeof Coin => {
-  Coin.init(
+export const initCoinModel = (sequelize: Sequelize): typeof WatchList => {
+  WatchList.init(
     {
-      id: {
+      userId: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-      },
-      name: {
-        type: DataTypes.STRING,
         allowNull: false,
       },
       symbol: {
@@ -26,10 +20,10 @@ export const initCoinModel = (sequelize: Sequelize): typeof Coin => {
     },
     {
       sequelize,
-      tableName: 'coins',
+      tableName: 'watchlist',
       timestamps: true,
     }
   );
 
-  return Coin;
+  return WatchList;
 };
