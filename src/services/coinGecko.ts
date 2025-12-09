@@ -41,23 +41,25 @@ export async function fetchCoins() {
         params: {
           vs_currency: 'usd',
           order: 'market_cap_desc',
-          per_page: 10,
+          per_page: 250,
           page: 1,
         },
       }
     );
 
     return res.data.map((coin) => ({
+      id: coin.id,
       rank: coin.market_cap_rank,
       name: coin.name,
       symbol: coin.symbol.toUpperCase(),
       price: coin.current_price,
       marketCap: coin.market_cap,
       change24h: coin.price_change_percentage_24h,
+      image: coin.image,
     }));
   } catch (err) {
     if (axios.isAxiosError(err) && err.response?.status === 429) {
-      console.log('Rate Limit reached, try again later.')
+      console.log('Rate Limit reached, try again later.');
     }
     console.error(err);
     throw new Error('Failed to fetch crypto data');
