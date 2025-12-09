@@ -29,23 +29,50 @@ export async function addWatchListCoins(req: Request, res: Response) {
     const userId = req.user?.id;
     const coins = req.body;
 
+    console.log('Received coins:', coins);
+
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-    if (coins.length === 0) {
-      return res
-        .status(500)
-        .json({ error: 'Request body must be a non-empty array of coins.' });
+    
+    if (!Array.isArray(coins) || coins.length === 0) {
+      return res.status(400).json({ error: 'Request body must be a non-empty array of coins.' });
     }
 
-    const coinsWithUserId = coins.map((c) => ({
-      ...c,
-      userId,
-    }));
+    const existingCoins = await WatchList.findAll({
+      where: {
+        userId,
+        coinId: coins.map(c => c.id),
+      },
+    });
 
-    const newCoins = await WatchList.bulkCreate(coinsWithUserId);
+    const existingIds = new Set(existingCoins.map(c => c.coinId));
+    
+    const newCoinsToAdd = coins
+      .filter(c => !existingIds.has(c.id))
+      .map(c => ({
+        coinId: c.id,
+        userId,
+      }));
 
-    res.status(201).json(newCoins);
+    console.log('New coins to add:', newCoinsToAdd);
+
+    if (newCoinsToAdd.length === 0) {
+      return res.status(200).json({ 
+        message: 'All coins already in watchlist',
+        added: []
+      });
+    }
+
+    const newCoins = await WatchList.bulkCreate(newCoinsToAdd);
+
+    res.status(201).json({
+      message: `Successfully added ${newCoins.length} coin(s)`,
+      added: newCoins
+    });
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    console.error('Error adding watchlist coins:', err);
+    res.status(500).json({ 
+      error: err instanceof Error ? err.message : 'Failed to add coins'
+    });
   }
 }
 
@@ -57,9 +84,9 @@ export async function getWatchListCoins(req: Request, res: Response) {
     const data = await WatchList.findAll({
       where: { userId },
     });
-    const symbols = data.map((d) => d.symbol);
+    const coinIds = data.map((d) => d.coinId);
 
-    let coinGeckoData = await CacheService.get<CoinData[]>(CACHE_KEY); // Add type parameter
+    let coinGeckoData = await CacheService.get<CoinData[]>(CACHE_KEY);
 
     if (!coinGeckoData) {
       coinGeckoData = await fetchCoins();
@@ -69,7 +96,7 @@ export async function getWatchListCoins(req: Request, res: Response) {
     }
 
     const populatedData = coinGeckoData.filter((c) =>
-      symbols.includes(c.symbol)
+      coinIds.includes(c.id)
     );
 
     res.json(populatedData);
@@ -80,11 +107,11 @@ export async function getWatchListCoins(req: Request, res: Response) {
 
 export async function deleteWatchListCoins(req: Request, res: Response) {
   try {
-    const { symbol } = req.body;
-    console.log('Symbol to delete', symbol);
+    const { id } = req.body;
+    console.log('Coin ID to delete', id);
     const userId = req.user?.id;
     const data = await WatchList.destroy({
-      where: { userId, symbol },
+      where: { userId, coinId: id },
     });
     res.json(data);
   } catch (err) {
