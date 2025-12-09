@@ -1,4 +1,5 @@
 export interface CoinData {
+  id: string,
   rank: number;
   name: string;
   symbol: string;
