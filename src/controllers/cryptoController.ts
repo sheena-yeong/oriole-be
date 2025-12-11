@@ -134,8 +134,8 @@ export async function getMarketChart(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const days = Number(req.query.days);
-
-    const cachedChart = await CacheService.get(MARKET_CACHE_KEY);
+    const cacheKey = `${MARKET_CACHE_KEY}:${id}:${days}`;
+    const cachedChart = await CacheService.get(cacheKey);
 
     if (cachedChart) {
       console.log(`Market chart for ${id} (${days}d) from cache`);
