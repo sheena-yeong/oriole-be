@@ -1,12 +1,13 @@
-import express, { Request, Response } from 'express';
 import cors from 'cors';
-import logger from 'morgan';
-import { verifyToken } from './middleware/verifyToken';
 import dotenv from 'dotenv';
+import logger from 'morgan';
+import express from 'express';
+import { verifyToken } from './middleware/verifyToken';
 import { connectDB } from './db/db';
+import { connectRedis, disconnectRedis } from './utils/redis';
 import authRouter from './routers/authRoutes';
 import cryptoRouter from './routers/cryptoRoutes';
-import { connectRedis, disconnectRedis } from './utils/redis';
+import paymentRouter from './routers/paymentRoutes'
 
 dotenv.config();
 const app = express();
@@ -24,6 +25,8 @@ app.use(logger('dev'));
 
 app.use('/auth', authRouter);
 app.use('/coins', verifyToken, cryptoRouter);
+app.use('/payment', verifyToken, paymentRouter);
+
 
 async function startServer() {
   try {
@@ -42,6 +45,6 @@ async function startServer() {
 process.on('SIGINT', async () => {
   await disconnectRedis();
   process.exit(0);
-})
+});
 
 startServer();
