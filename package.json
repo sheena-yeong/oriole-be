@@ -23,6 +23,7 @@
     "pg-hstore": "^2.3.4",
     "redis": "^5.10.0",
     "sequelize": "^6.37.7",
+    "stripe": "^20.0.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
