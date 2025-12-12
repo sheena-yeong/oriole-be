@@ -8,6 +8,9 @@ import { connectRedis, disconnectRedis } from './utils/redis';
 import authRouter from './routers/authRoutes';
 import cryptoRouter from './routers/cryptoRoutes';
 import paymentRouter from './routers/paymentRoutes'
+import {
+  handleWebhook,
+} from './controllers/paymentController';
 
 dotenv.config();
 const app = express();
@@ -26,6 +29,11 @@ app.use(logger('dev'));
 app.use('/auth', authRouter);
 app.use('/coins', verifyToken, cryptoRouter);
 app.use('/payment', verifyToken, paymentRouter);
+app.post(
+  '/payment/webhook',
+  express.raw({ type: 'application/json' }),
+  handleWebhook
+);
 
 
 async function startServer() {
