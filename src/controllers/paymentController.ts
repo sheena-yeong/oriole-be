@@ -79,7 +79,10 @@ export const handleWebhook = async (req: Request, res: Response) => {
   switch (event.type) {
     case 'payment_intent.succeeded':
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const { coinSymbol, coinAmount, coinId } = paymentIntent.metadata;
       console.log('Payment succeeded', paymentIntent.id);
+      console.log(`Credit ${coinAmount} ${coinSymbol} to user`);
+
       // send nodemailer
       // await updateOrderStatus(paymentIntent.metadata.orderId, 'paid');
 
