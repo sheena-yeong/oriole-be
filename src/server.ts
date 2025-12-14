@@ -6,7 +6,7 @@ import { verifyToken } from './middleware/verifyToken';
 import { connectDB } from './db/db';
 import { connectRedis, disconnectRedis } from './utils/redis';
 import authRouter from './routers/authRoutes';
-import cryptoRouter from './routers/cryptoRoutes';
+import cryptoRouter from './routers/cryptoDataRoutes';
 import paymentRouter from './routers/paymentRoutes'
 import {
   handleWebhook,

@@ -6,13 +6,15 @@ import {
   getWatchListCoins,
   deleteWatchListCoins,
   getMarketChart,
-  getFearGreedLatest
-} from '../controllers/cryptoController';
+  getFearGreedLatest,
+} from '../controllers/cryptoDataController';
 
 router.get('/', getCoins);
+
 router.post('/watchlist', addWatchListCoins);
 router.get('/watchlist', getWatchListCoins);
 router.delete('/watchlist', deleteWatchListCoins);
+
 router.get('/:id/market-chart', getMarketChart)
 router.get('/fear-greed', getFearGreedLatest)
 
