@@ -6,7 +6,7 @@ import { verifyToken } from './middleware/verifyToken';
 import { connectDB } from './db/db';
 import { connectRedis, disconnectRedis } from './utils/redis';
 import authRouter from './routers/authRoutes';
-import cryptoRouter from './routers/cryptoDataRoutes';
+import cryptoDataRouter from './routers/cryptoDataRoutes';
 import paymentRouter from './routers/paymentRoutes';
 import { handleWebhook } from './controllers/paymentController';
 import portfolioRouter from './routers/portfolioRoutes';
@@ -23,18 +23,20 @@ app.use(
     origin: ['http://localhost:5173'],
   })
 );
-app.use(express.json());
-app.use(logger('dev'));
 
-app.use('/auth', authRouter);
-app.use('/coins', verifyToken, cryptoRouter);
-app.use('/payment', verifyToken, paymentRouter);
 app.post(
   '/payment/webhook',
   express.raw({ type: 'application/json' }),
   handleWebhook
 );
-app.use('/wallet', verifyToken, paymentRouter);
+
+app.use(express.json());
+app.use(logger('dev'));
+
+app.use('/auth', authRouter);
+app.use('/coins', verifyToken, cryptoDataRouter);
+app.use('/payment', verifyToken, paymentRouter);
+app.use('/wallet', verifyToken, walletRouter);
 app.use('/portfolio', verifyToken, portfolioRouter);
 
 async function startServer() {
