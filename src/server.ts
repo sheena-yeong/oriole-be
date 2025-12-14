@@ -7,10 +7,9 @@ import { connectDB } from './db/db';
 import { connectRedis, disconnectRedis } from './utils/redis';
 import authRouter from './routers/authRoutes';
 import cryptoRouter from './routers/cryptoDataRoutes';
-import paymentRouter from './routers/paymentRoutes'
-import {
-  handleWebhook,
-} from './controllers/paymentController';
+import paymentRouter from './routers/paymentRoutes';
+import portfolioRouter from './routers/portfolioRoutes';
+import { handleWebhook } from './controllers/paymentController';
 
 dotenv.config();
 const app = express();
@@ -34,7 +33,7 @@ app.post(
   express.raw({ type: 'application/json' }),
   handleWebhook
 );
-
+app.use('/portfolio', verifyToken, portfolioRouter);
 
 async function startServer() {
   try {
