@@ -39,7 +39,7 @@ export const initUserCoinsModel = (sequelize: Sequelize): typeof UserCoins => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: 'Users',
+          model: 'users',
           key: 'id',
         },
         onDelete: 'CASCADE', // if user is deleted, delete all coins too
@@ -49,11 +49,11 @@ export const initUserCoinsModel = (sequelize: Sequelize): typeof UserCoins => {
         allowNull: false,
       },
       quantity: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL(20, 8),
         allowNull: false,
       },
       buyPrice: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL(20, 8),
         allowNull: false,
       },
     },
@@ -61,6 +61,12 @@ export const initUserCoinsModel = (sequelize: Sequelize): typeof UserCoins => {
       sequelize,
       tableName: 'userCoins',
       timestamps: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ['userId', 'coinSymbol'],
+        },
+      ],
     }
   );
   return UserCoins;
