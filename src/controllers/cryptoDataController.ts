@@ -4,7 +4,7 @@ import { fetchMarketChart } from '../services/coinGecko';
 import { fetchFearGreedLatest } from '../services/coinyBubble';
 import { WatchList } from '../models/WatchList';
 import { CacheService } from '../services/cache';
-import type { CoinData } from '../../types/coins';
+import type { CoinData } from '../types/coins';
 
 const COIN_CACHE_KEY = 'coingecko:coins';
 const MARKET_CACHE_KEY = `coingecko:market-chart`;
