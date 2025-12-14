@@ -1,6 +1,28 @@
 import { Request, Response } from 'express';
 import { User } from '../models/User';
 
+export async function getWalletBalance(req: Request, res: Response) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(200).json({
+      balance: user.walletBalance,
+    });
+  } catch (err) {
+    console.error('Error getting wallet balance:', err);
+    res.status(500).json({
+      error: err instanceof Error ? err.message : 'Failed to get balance',
+    });
+  }
+}
 
 export async function topUpWallet(req: Request, res: Response) {
   try {
@@ -35,25 +57,4 @@ export async function topUpWallet(req: Request, res: Response) {
   }
 }
 
-export async function getWalletBalance(req: Request, res: Response) {
-  try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
 
-    const user = await User.findByPk(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    return res.status(200).json({
-      balance: user.walletBalance,
-    });
-  } catch (err) {
-    console.error('Error getting wallet balance:', err);
-    res.status(500).json({
-      error: err instanceof Error ? err.message : 'Failed to get balance',
-    });
-  }
-}
