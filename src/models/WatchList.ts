@@ -15,7 +15,6 @@ export const initWatchlistModel = (sequelize: Sequelize): typeof WatchList => {
       coinId: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
       },
     },
     {

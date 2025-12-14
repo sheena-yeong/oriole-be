@@ -7,12 +7,13 @@ interface UserAttributes {
   password: string;
   firstName?: string;
   lastName?: string;
+  walletBalance: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 // id, created and updated at is optional since it's auto-generated
-interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt' | 'walletBalance'> {}
 
 // Extend the Sequlize Model class
 class User
@@ -24,6 +25,7 @@ class User
   public password!: string;
   public firstName?: string;
   public lastName?: string;
+  public walletBalance!: number;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -66,6 +68,11 @@ export const initUserModel = (sequelize: Sequelize): typeof User => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      walletBalance: {
+        type: DataTypes.DECIMAL(18,8),
+        allowNull: false,
+        defaultValue: 0,
+      }
     },
     {
       sequelize,
