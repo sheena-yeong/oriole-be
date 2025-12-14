@@ -14,7 +14,7 @@ interface UserCoinCreationAttributes
   extends Optional<UserCoinAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
 class UserCoins
-  extends Model<UserCoinAttributes>
+  extends Model<UserCoinAttributes, UserCoinCreationAttributes>
   implements UserCoinAttributes
 {
   public id!: number;
