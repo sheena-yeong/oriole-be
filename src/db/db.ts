@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { Sequelize } from 'sequelize';
 import { initUserModel } from '../models/User';
 import { initWatchlistModel } from '../models/WatchList';
+import { initUserCoinsModel } from '../models/UserCoins';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ const connectDB = async () => {
     await sequelize.authenticate();
     initUserModel(sequelize);
     initWatchlistModel(sequelize);
+    initUserCoinsModel(sequelize);
     await sequelize.sync({ alter: true });
     console.log('Database connected');
   } catch (error) {
