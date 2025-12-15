@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { User } from '../models/User';
-import { UserCoins } from '../models/UserCoins';
-import { sequelize } from '../db/db';
-import { Transaction } from 'sequelize';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -17,14 +14,22 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
         .json({ error: 'Invalid amount. Must be greater than 0.' });
     }
 
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100),
       currency: currency.toLowerCase(),
       metadata: {
         ...metadata,
-        userId: req.user?.id,
+        userId: req.user?.id.toString(),
+        type: 'wallet_topup',
       },
     });
+
+    console.log('Created payment intent:', paymentIntent.id, 'for user:', userId);
 
     res.status(200).json({
       clientSecret: paymentIntent.client_secret,
@@ -65,6 +70,7 @@ export const confirmPayment = async (req: Request, res: Response) => {
 };
 
 export const handleWebhook = async (req: Request, res: Response) => {
+  console.log('Webhook received');
   const signature = req.headers['stripe-signature'] as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -83,122 +89,32 @@ export const handleWebhook = async (req: Request, res: Response) => {
   switch (event.type) {
     case 'payment_intent.succeeded':
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      const { coinSymbol, coinAmount, coinId } = paymentIntent.metadata;
-      console.log('Payment succeeded', paymentIntent.id);
-      console.log(`Credit ${coinAmount} ${coinSymbol} to user`);
+      const { userId, type } = paymentIntent.metadata;
 
-      // send nodemailer
-      // await updateOrderStatus(paymentIntent.metadata.orderId, 'paid');
+      if (type === 'wallet_topup' && userId) {
+        const amount = paymentIntent.amount / 100;
+
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+          console.error(
+            `User ${userId} not found for payment ${paymentIntent.id}`
+          );
+          break;
+        }
+
+        const currentBalance = parseFloat(user.walletBalance.toString());
+        user.walletBalance = currentBalance + amount;
+
+        await user.save();
+      }
 
       break;
 
     case 'payment_intent.payment_failed':
       const failedPayment = event.data.object as Stripe.PaymentIntent;
       console.log('Payment failed', failedPayment.id);
-      // send nodemailer
-      // await updateOrderStatus(payment.Intent.metadata.orderId. 'failed');
-
       break;
   }
+  return res.status(200).json({ received: true });
 };
-
-export async function purchaseCrypto(req: Request, res: Response) {
-  const t: Transaction = await sequelize.transaction();
-
-  try {
-    const { userId, coinSymbol, quantity, buyPrice, totalCost } = req.body;
-
-    if (!userId || !coinSymbol || !quantity || !buyPrice || !totalCost) {
-      await t.rollback();
-      return res.status(400).json({
-        error:
-          'Missing required fields: userId, coinSymbol, quantity, buyPrice.',
-      });
-    }
-
-    const quantityNum = parseFloat(quantity);
-    const buyPriceNum = parseFloat(buyPrice);
-    const totalCostNum = parseFloat(totalCost);
-
-    if (quantityNum <= 0 || buyPriceNum <= 0) {
-      await t.rollback();
-      return res.status(400).json({ error: 'Invalid quantity or price' });
-    }
-
-    const user = await User.findByPk(userId, {
-      lock: t.LOCK.UPDATE,
-      transaction: t,
-    });
-
-    if (!user) {
-      await t.rollback();
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    const currentBalance = parseFloat(user.walletBalance.toString());
-
-    if (currentBalance < totalCostNum) {
-      await t.rollback();
-      return res.status(400).json({
-        error: 'Insufficient wallet balance',
-        required: totalCostNum,
-        available: currentBalance,
-      });
-    }
-
-    user.walletBalance = currentBalance - totalCostNum;
-    await user.save({ transaction: t });
-
-    const existingCoin = await UserCoins.findOne({
-      where: {
-        userId: userId,
-        coinSymbol: coinSymbol,
-      },
-      transaction: t,
-    });
-
-    let userCoin;
-
-    if (existingCoin) {
-      const existingQuantity = parseFloat(existingCoin.quantity.toString());
-      const existingBuyPrice = parseFloat(existingCoin.buyPrice.toString());
-
-      const totalQuantity = existingQuantity + quantityNum;
-      const totalValue =
-        existingQuantity * existingBuyPrice + quantityNum * buyPriceNum;
-      const newAverageBuyPrice = totalValue / totalQuantity;
-
-      existingCoin.quantity = totalQuantity;
-      existingCoin.buyPrice = newAverageBuyPrice;
-      await existingCoin.save({ transaction: t });
-
-      userCoin = existingCoin;
-    } else {
-      userCoin = await UserCoins.create({
-        userId: userId,
-        coinSymbol: coinSymbol,
-        quantity: quantityNum,
-        buyPrice: buyPriceNum,
-      },
-    {
-      transaction: t
-    })
-    }
-
-    await t.commit();
-
-    return res.status(200).json({
-      mesage: 'Crypto purchased successfully',
-      coin: {
-        symbol: userCoin.coinSymbol,
-        quantity: userCoin.quantity,
-      },
-      newWalletBalance: user.walletBalance
-    })
-  } catch (err) {
-    await t.rollback();
-    res.status(500).json({
-      error: err instanceof Error ? err.message : 'Failed to add user coin.',
-    });
-  }
-}
