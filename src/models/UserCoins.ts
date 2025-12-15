@@ -3,7 +3,7 @@ import { Model, DataTypes, Sequelize, Optional } from 'sequelize';
 interface UserCoinAttributes {
   id: number;
   userId: number;
-  coinSymbol: string;
+  coinId: string;
   quantity: number;
   buyPrice: number;
   createdAt?: Date;
@@ -19,7 +19,7 @@ class UserCoins
 {
   public id!: number;
   public userId!: number;
-  public coinSymbol!: string;
+  public coinId!: string;
   public quantity!: number;
   public buyPrice!: number;
 
@@ -44,7 +44,7 @@ export const initUserCoinsModel = (sequelize: Sequelize): typeof UserCoins => {
         },
         onDelete: 'CASCADE', // if user is deleted, delete all coins too
       },
-      coinSymbol: {
+      coinId: {
         type: DataTypes.STRING,
         allowNull: false,
       },
