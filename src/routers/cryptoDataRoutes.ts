@@ -8,6 +8,7 @@ import {
   getMarketChart,
   getFearGreedLatest,
   getTrendingSearches,
+  getTopGainers
 } from '../controllers/cryptoDataController';
 
 router.get('/', getCoins);
@@ -19,5 +20,6 @@ router.delete('/watchlist', deleteWatchListCoins);
 router.get('/:id/market-chart', getMarketChart);
 router.get('/fear-greed', getFearGreedLatest);
 router.get('/trending', getTrendingSearches);
+router.get('/gainers', getTopGainers);
 
 export default router;
