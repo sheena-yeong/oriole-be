@@ -103,3 +103,33 @@ export const signIn = async (
     return res.status(500).json({ error: 'An unexpected error occurred.' });
   }
 };
+
+export const changePassword = async (req: Request, res: Response) => {
+  console.log('changePassword endpoint hit', req.body, req.user?.id);
+
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+
+  if (newPassword !== confirmPassword) {
+    return res.json({ success: false, message: 'Passwords do not match' });
+  }
+
+  const user = await User.findByPk(req.user.id);
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found.' });
+  }
+  const ok = await bcrypt.compare(oldPassword, user.password);
+
+  if (!ok) {
+    return res.status(400).json({ success: false, message: 'Wrong password' });
+  }
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  user.password = hashed;
+  await user.save();
+
+  res.json({ success: true, message: 'Password successfully updated.' });
+};
