@@ -64,7 +64,7 @@ export const initUserCoinsModel = (sequelize: Sequelize): typeof UserCoins => {
       indexes: [
         {
           unique: true,
-          fields: ['userId', 'coinSymbol'],
+          fields: ['userId', 'coinId'],
         },
       ],
     }
