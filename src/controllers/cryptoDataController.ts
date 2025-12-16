@@ -2,17 +2,22 @@ import { Request, Response } from 'express';
 import { fetchCoins } from '../services/coinGecko';
 import { fetchMarketChart } from '../services/coinGecko';
 import { fetchFearGreedLatest } from '../services/coinyBubble';
+import { fetchTrendingSearches } from '../services/coinGecko';
 import { WatchList } from '../models/WatchList';
 import { CacheService } from '../services/cache';
 import type { CoinData } from '../types/coins';
 
 const COIN_CACHE_KEY = 'coingecko:coins';
 const MARKET_CACHE_KEY = `coingecko:market-chart`;
-const FG_IDX_KEY = `coinybubble:fear-greed-index`;
+const FG_IDX_CACHE_KEY = `coinybubble:fear-greed-index`;
+const TRENDING_CACHE_KEY = `coingecko:trending-searches`;
+
 
 const COIN_DETAILS_CACHE_TTL = 300;
-const FG_IDX_TTL = 300;
+const FG_IDX_CACHE_TTL = 300;
 const MARKET_CHART_CACHE_TTL = 600;
+const TRENDING_CACHE_TTL = 300;
+
 
 export async function getCoins(req: Request, res: Response) {
   try {
@@ -154,7 +159,7 @@ export async function getMarketChart(req: Request, res: Response) {
 
 export async function getFearGreedLatest(req: Request, res: Response) {
   try {
-    const cachedData = await CacheService.get(FG_IDX_KEY);
+    const cachedData = await CacheService.get(FG_IDX_CACHE_KEY);
 
     if (cachedData) {
       console.log(`Fear-greed index from cache`);
@@ -162,7 +167,25 @@ export async function getFearGreedLatest(req: Request, res: Response) {
     }
 
     const data = await fetchFearGreedLatest();
-    await CacheService.set(FG_IDX_KEY, data, FG_IDX_TTL);
+    await CacheService.set(FG_IDX_CACHE_KEY, data, FG_IDX_CACHE_TTL);
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+}
+
+export async function getTrendingSearches(req: Request, res: Response) {
+  try {
+    const cachedData = await CacheService.get(TRENDING_CACHE_KEY);
+
+    if (cachedData) {
+      console.log(`Fear-greed index from cache`);
+      return res.json(cachedData);
+    }
+
+    const data = await fetchTrendingSearches();
+    await CacheService.set(TRENDING_CACHE_KEY, data, TRENDING_CACHE_TTL);
 
     res.json(data);
   } catch (err) {

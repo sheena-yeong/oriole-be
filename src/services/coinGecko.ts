@@ -86,3 +86,18 @@ export const fetchMarketChart = async (id: string, days: number = 7) => {
     throw new Error('Failed to fetch market chart data');
   }
 };
+
+export const fetchTrendingSearches = async () => {
+  try {
+    const response = await axios.get(
+      `https://api.coingecko.com/api/v3/search/trending`
+    );
+    return response.data;
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 429) {
+      console.log('Rate Limit reached, try again later.');
+    }
+    console.error(err);
+    throw new Error('Failed to fetch trending searches');
+  }
+};
