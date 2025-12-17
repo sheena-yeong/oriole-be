@@ -18,13 +18,13 @@ const GAINERS_CACHE_KEY = `coingecko:top-gainers`;
 const LOSERS_CACHE_KEY = `coingecko:top-losers`;
 const DESCRIPTION_CACHE_KEY = `coingecko:coin-description`;
 
-const COIN_DETAILS_CACHE_TTL = 300;
-const FG_IDX_CACHE_TTL = 300;
+const COIN_DETAILS_CACHE_TTL = 600;
+const FG_IDX_CACHE_TTL = 600;
 const MARKET_CHART_CACHE_TTL = 600;
-const TRENDING_CACHE_TTL = 300;
-const GAINERS_CACHE_TTL = 300;
-const LOSERS_CACHE_TTL = 300;
-const DESCRIPTION_CACHE_TTL = 10000;
+const TRENDING_CACHE_TTL = 3600;
+const GAINERS_CACHE_TTL = 600;
+const LOSERS_CACHE_TTL = 600;
+const DESCRIPTION_CACHE_TTL = 43200;
 
 export async function getCoins(req: Request, res: Response) {
   try {
