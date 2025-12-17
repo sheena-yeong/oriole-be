@@ -10,7 +10,7 @@ import cryptoDataRouter from './routers/cryptoDataRoutes';
 import paymentRouter from './routers/paymentRoutes';
 import { handleWebhook } from './controllers/paymentController';
 import portfolioRouter from './routers/portfolioRoutes';
-import walletRouter from './routers/walletRoutes'
+import walletRouter from './routers/walletRoutes';
 
 dotenv.config();
 const app = express();
@@ -20,7 +20,8 @@ connectDB();
 
 app.use(
   cors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', 'https://oriole.up.railway.app'],
+    credentials: true
   })
 );
 
