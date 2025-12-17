@@ -1,21 +1,34 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
-export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
+interface AuthPayload extends JwtPayload {
+  id: number;
+  email: string;
+}
+
+export const verifyToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Missing token' });
+  }
+
+  const secret = process.env.ACCESS_SECRET;
+  if (!secret) {
+    return res.status(500).json({ err: 'Server configuration error' });
+  }
+
   try {
-    if (!req.headers.authorization) {
-      return res.status(401).json({ err: 'No token provided ' });
-    }
+    const decoded = jwt.verify(token, secret) as AuthPayload;
 
-    const token = req.headers.authorization.split(' ')[1];
-
-    const secret = process.env.ACCESS_SECRET;
-    if (!secret) {
-      return res.status(500).json({ err: 'Server configuration error' });
-    }
-    const decoded = jwt.verify(token, secret);
-
-    req.user = decoded;
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+    };
 
     return next();
   } catch (err) {
