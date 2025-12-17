@@ -5,6 +5,7 @@ import { fetchFearGreedLatest } from '../services/coinyBubble';
 import { fetchTrendingSearches } from '../services/coinGecko';
 import { fetchTopGainers } from '../services/coinGecko';
 import { fetchTopLosers } from '../services/coinGecko';
+import { fetchCoinDescription } from '../services/coinGecko';
 import { WatchList } from '../models/WatchList';
 import { CacheService } from '../services/cache';
 import type { CoinData } from '../types/coins';
@@ -15,6 +16,7 @@ const FG_IDX_CACHE_KEY = `coinybubble:fear-greed-index`;
 const TRENDING_CACHE_KEY = `coingecko:trending-searches`;
 const GAINERS_CACHE_KEY = `coingecko:top-gainers`;
 const LOSERS_CACHE_KEY = `coingecko:top-losers`;
+const DESCRIPTION_CACHE_KEY = `coingecko:coin-description`;
 
 const COIN_DETAILS_CACHE_TTL = 300;
 const FG_IDX_CACHE_TTL = 300;
@@ -22,6 +24,7 @@ const MARKET_CHART_CACHE_TTL = 600;
 const TRENDING_CACHE_TTL = 300;
 const GAINERS_CACHE_TTL = 300;
 const LOSERS_CACHE_TTL = 300;
+const DESCRIPTION_CACHE_TTL = 10000;
 
 export async function getCoins(req: Request, res: Response) {
   try {
@@ -153,7 +156,7 @@ export async function getMarketChart(req: Request, res: Response) {
 
     const data = await fetchMarketChart(id, days);
 
-    await CacheService.set(MARKET_CACHE_KEY, data, MARKET_CHART_CACHE_TTL);
+    await CacheService.set(cacheKey, data, MARKET_CHART_CACHE_TTL);
 
     res.json(data);
   } catch (err) {
@@ -228,6 +231,27 @@ export async function getTopLosers(req: Request, res: Response) {
     const data = await fetchTopLosers();
 
     await CacheService.set(LOSERS_CACHE_KEY, data, LOSERS_CACHE_TTL);
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+}
+
+export async function getCoinDescription (req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const cacheKey = `${DESCRIPTION_CACHE_KEY}:${id}`;
+    const cachedData = await CacheService.get(cacheKey);
+
+    if (cachedData) {
+      console.log(`Coin Description for ${id} from cache`);
+      return res.json(cachedData);
+    }
+
+    const data = await fetchCoinDescription(id);
+
+    await CacheService.set(cacheKey, data, DESCRIPTION_CACHE_TTL);
 
     res.json(data);
   } catch (err) {

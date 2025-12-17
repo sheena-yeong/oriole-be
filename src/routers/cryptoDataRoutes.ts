@@ -9,7 +9,8 @@ import {
   getFearGreedLatest,
   getTrendingSearches,
   getTopGainers,
-  getTopLosers
+  getTopLosers,
+  getCoinDescription
 } from '../controllers/cryptoDataController';
 
 router.get('/', getCoins);
@@ -23,5 +24,7 @@ router.get('/fear-greed', getFearGreedLatest);
 router.get('/trending', getTrendingSearches);
 router.get('/gainers', getTopGainers);
 router.get('/losers', getTopLosers);
+router.get('/description/:id', getCoinDescription);
+
 
 export default router;

@@ -168,3 +168,23 @@ export const fetchTopLosers = async () => {
     throw new Error('Failed to fetch top losers.');
   }
 };
+
+export const fetchCoinDescription = async (id: string) => {
+  try {
+    const response = await axios.get(
+      `https://api.coingecko.com/api/v3/coins/${id}`
+    );
+    return {
+      description: response.data.description.en ?? '',
+      homepage: response.data.links.homepage[0] ?? '',
+      genesisDate: response.data.genesis_date ?? '',
+      sentiment: response.data.sentiment_votes_up_percentage ?? ''
+    };
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 429) {
+      console.log('Rate Limit reached, try again later.');
+    }
+    console.error(err);
+    throw new Error('Failed to fetch market chart data');
+  }
+};
