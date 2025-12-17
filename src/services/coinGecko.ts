@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { CoinMarket } from '../types/coins';
 
 export interface CoinGeckoData {
   id: string;
@@ -104,24 +105,66 @@ export const fetchTrendingSearches = async () => {
 
 export const fetchTopGainers = async () => {
   try {
-    const response = await axios.get(
+    const response = await axios.get<CoinMarket[]>(
       `https://api.coingecko.com/api/v3/coins/markets`,
       {
         params: {
           vs_currency: 'usd',
           order: 'market_cap_desc',
-          per_page: 10,
+          per_page: 250,
           page: 1,
           price_change_percentage: '24h',
         },
       }
     );
-    return response.data;
+
+    const topGainers = response.data
+      .sort(
+        (a, b) =>
+          (b.price_change_percentage_24h ?? 0) -
+          (a.price_change_percentage_24h ?? 0)
+      )
+      .slice(0, 3);
+
+    return topGainers;
   } catch (err) {
     if (axios.isAxiosError(err) && err.response?.status === 429) {
       console.log('Rate Limit reached, try again later.');
     }
     console.error(err);
     throw new Error('Failed to fetch top gainers.');
+  }
+};
+
+export const fetchTopLosers = async () => {
+  try {
+    const response = await axios.get<CoinMarket[]>(
+      `https://api.coingecko.com/api/v3/coins/markets`,
+      {
+        params: {
+          vs_currency: 'usd',
+          order: 'market_cap_desc',
+          per_page: 250,
+          page: 1,
+          price_change_percentage: '24h',
+        },
+      }
+    );
+
+    const topLosers = response.data
+      .sort(
+        (a, b) =>
+          (a.price_change_percentage_24h ?? 0) -
+          (b.price_change_percentage_24h ?? 0)
+      )
+      .slice(0, 3);
+
+    return topLosers;
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 429) {
+      console.log('Rate Limit reached, try again later.');
+    }
+    console.error(err);
+    throw new Error('Failed to fetch top losers.');
   }
 };
