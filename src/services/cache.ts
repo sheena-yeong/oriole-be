@@ -16,7 +16,7 @@ export class CacheService {
   }
 
   // Set cache with expiration
-  static async set(key: string, value: any, expirationSeconds: number): Promise<void> {
+  static async set<T>(key: string, value: T, expirationSeconds: number): Promise<void> {
     try {
       await redisClient.setEx(
         key,

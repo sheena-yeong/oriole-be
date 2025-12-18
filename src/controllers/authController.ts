@@ -46,7 +46,6 @@ export const signUp = async (
       if (err.name === 'SequelizeValidationError') {
         return res.status(400).json({
           error: 'Validation error',
-          details: (err as any).errors?.map((e: any) => e.message),
         });
       }
 
